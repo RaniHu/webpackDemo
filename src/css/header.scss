@@ -1,0 +1,20 @@
+$header-bgColor:#0000fe;
+#header{
+  background-color: $header-bgColor;
+  ul{
+    text-align: center;
+    li{
+      color: #ffffff;
+      padding: 15px 20px;
+      display: inline-block;
+      &.active{
+        color: darken($header-bgColor,60%);
+      }
+    }
+  }
+}
+#header.header-fixed{
+  position: fixed;
+  top: 0;
+  left: 0;
+}
