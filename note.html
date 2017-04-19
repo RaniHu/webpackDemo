@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <!--
+    一、什么是webpack？
+    1.webpack是一款模块加载器兼打包工具，它能把各种资源，如js，sass/less，图片等都作为模块来使用和处理。
+    2.我们可以使用require()的形式来引入各个模块，即使它们需要经过编译，因为webpack有健全的加载器在处理这些
+
+    二、为什么使用webpack？
+    1.越来越多的网站已经从网页模式进化到webapp，webapp通常是一个单页面应用，每一个视图通过异步的方式加载，
+      这导致页面初始化和使用过程中会加载越来越多的js代码，这给前端开发和资源组织带来巨大挑战。
+    2.原始的<script>方式加载，他们的接口暴露在全局作用域下，容易造成变量冲突、文件只能按照书写顺序加载、
+      大型项目中资源难以管理
+    3.common.js核心思想是允许模块通过require方法来同步加载所要依赖的模块，通过exports暴露接口。
+      使用简单，但同步加载方式不适用于浏览器端，同步意味着阻塞，不能非阻塞的并行加载多个模块
+
+    三、webpack的优势？
+    1.以commonJs规范来书写脚本，但对AMD/CMD的支持也很健全，方便旧项目进行代码迁移
+    2.开发敏捷，能替代部分gulp/grunt的工作，比如打包，压缩，图片转base64
+    3.扩展性强，插件机制完善，
+    4.代码分割，提供按需加载的能力
+
+    四、webpack和gulp的区别？
+    1.gulp是构建工具、如刷新页面，压缩css、js、编译sass，代替手工实现自动化工作
+    2.webpack是打包工具，把项目各种js、css文件打包合并成一个或多个文件，，主要用于模块化方案
+
+    gulp与webpack配合,这样webpack.config.js中的配置只用写到webpack({})中即可
+    gulp.task("webpack", function(callback) {
+        // run webpack
+        webpack({
+            // configuration
+        }, function(err, stats) {
+            if(err) throw new gutil.PluginError("webpack", err);
+            gutil.log("[webpack]", stats.toString({
+                // output options
+            }));
+            callback();
+        });
+    });
+
+
+
+    五、安装和配置
+    1.安装node.js
+    2.cnpm install webpack -g                       全局安装webpack到本地环境
+    3.cd 进入项目文件夹
+    4.cnpm init                                     会自动生成一个package.json文件
+    5.cnpm install webpack --save-dev               将安装到项目的依赖中
+    6.创建配置文件webpack.config.js
+
+
+
+    六、创建目录
+    app
+        -index.js
+        -sub.js
+    package.json
+    webpack.config.js
+
+    执行命令cnpm install html-webpack-plugin --save-dev   自动生成html
+
+    七、配置webpack.config.js
+
+    //导入模块
+    var webpack = require('webpack');
+    var path=require('path');
+    var htmlWebpackPlugin=require('html-webpack-plugin');
+
+    //定义文件夹路径
+    //定义文件夹路径
+    var ROOT_PATH = path.resolve(__dirname);
+    var APP_PATH = path.resolve(ROOT_PATH, './app/js/index.js');
+    var BUILD_PATH = path.resolve(ROOT_PATH, 'build');
+
+    module.exports = {
+        plugins: [new htmlWebpackPlugin({
+            title:"hello world"
+        })],
+        //页面入口文件配置,默认为index.js
+        entry: {
+            entry : APP_PATH
+        },
+
+        //入口文件输出配置
+        output: {
+            path:  BUILD_PATH,                  //输出文件的保存路径(使用绝对路径)
+            filename: 'bundle.js'               //最终生成文件名
+        }
+
+     };
+
+    1.在根目录执行 webpack  命令，会多出bundle.js,index.html文件，多个js文件合并到bundle中
+
+
+    八、实时刷新(热更新)
+    1.全局安装          cnpm install webpack-dev-server -g
+    2.安装到项目依赖    cnpm install webpack-dev-server --save-dev
+    3.根目录下执行      webpack-dev-server
+    两种模式自动刷新
+    1.iframe
+        直接访问http://localhost:8080/webpack-dev-server/index.html
+    2.inline
+        执行  webpack-dev-server --inline
+        访问  http://localhost:8080/index.html就能自动刷新
+
+    3.配置package.json
+    "scripts": {
+        "start": "webpack-dev-server --hot --inline"
+    },
+    4.配置webpack.config.js
+     devServer: {
+        historyApiFallback: true,
+        hot: true,
+        inline: true
+     }
+    执行 cnpm start
+
+
+
+    九、loader(loaders是在打包构建过程中用来处理源文件的)
+    1.添加css样式
+    (1)安装loader
+       cnpm install css-loader style-loader --save-dev
+
+    (2)预编译sass
+       cnpm install sass-loader --save-dev
+
+    (3)配置loader
+       webpack使用loader的方式来处理各种各样的资源
+       css-loader会遍历css文件，找到所有的url(...)并且处理(将 css 文件以 <style></style> 标签插入 <head></head> 头部)
+       style-loader会把所有的样式插入到你页面的一个style tag中(负责解读、加载 CSS 文件)
+
+       module: {
+           loaders: [
+            {
+                test: /\.scss$/,
+                loaders: ['style-loader', 'css-loader', 'sass-loader']
+            },
+        ]
+    },
+
+
+    2.处理图片（将一些图片自动转成base64编码）
+    (1)执行 cnpm install url-loader --save-dev   安装url-loader
+    (2)配置config文件
+        {
+              test: /\.(png|jpg)$/,
+              loaders: 'url-loader?limit=40000'       //图片小于这个限制的时候，会自动启用base64编码图片
+        }
+
+
+
+    3.添加es6支持
+    安装babel-loader   cnpm install babel-loader babel-core babel-preset-es2015 --save-dev
+    module: {
+        //加载器配置
+        loaders: [{
+            test: /\.js$/,
+            loaders: ['babel?presets[]=es2015'],
+            exclude: /node_modules/
+        }
+        ]
+    }
+
+    4.css单独打包
+    (1)安装extract-text-webpack-plugin
+       cnpm install extract-text-webpack-plugin --save-dev
+    (2)配置文件
+        var ExtractTextPlugin = require("extract-text-webpack-plugin");
+        new ExtractTextPlugin("./css/styles.css"),
+         module: {
+        //加载器配置
+        loaders: [
+            {
+                test: /.scss$/,
+                loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader!sass-loader' })
+            }
+        ]
+    }
+
+    5.自动补全前缀
+    cnpm install --save-dev autoprefixer postcss-loader
+
+    6.压缩
+    plugins: [
+        ...
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+         warnings: false
+        }
+    }),
+     ...
+    ]
+
+    7.挂载第三方插件
+    plugin:[
+     new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+            "window.jQuery": "jquery"
+    })
+
+    ]
+
+    8.自动补全前缀
+      plugin:[
+      new webpack.LoaderOptionsPlugin({
+            options: {
+                postcss: function(){
+                    return [
+                        require("autoprefixer")({
+                            browsers: ['ie>=8','>1% in CN']
+                        })
+                    ]
+                }
+            }
+        })
+        ]
+
+    loader: ExtractTextPlugin.extract(
+    {
+    fallback: 'style-loader', use: 'css-loader!postcss-loader!sass-loader'
+    }
+    )
+
+
+
+
+
+    -->
+
+
+
+</body>
+</html>
