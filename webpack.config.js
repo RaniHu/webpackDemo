@@ -86,7 +86,11 @@ module.exports = {
             {
                 test: /.scss$/,
                 loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader!postcss-loader!sass-loader' })
-            }
+            },
+             {
+                test: /\.(png|jpg)$/,
+                loaders: 'url-loader?limit=40000&name=images/[hash:8].[name].[ext]'       //图片小于这个限制的时候，会自动启用base64编码图片
+            },
         ]
     },
     /*externals:{
